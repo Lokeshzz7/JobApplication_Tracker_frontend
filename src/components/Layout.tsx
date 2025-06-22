@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +27,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -47,15 +47,20 @@ const navigation = [
 const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleSignOut = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
       <div className={cn(
         "bg-white shadow-lg transition-all duration-300 flex flex-col",
         sidebarOpen ? "w-64" : "w-16"
       )}>
-        {/* Logo */}
         <div className="p-4 border-b">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -66,8 +71,6 @@ const Layout = ({ children }: LayoutProps) => {
             )}
           </div>
         </div>
-
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
@@ -89,10 +92,7 @@ const Layout = ({ children }: LayoutProps) => {
           })}
         </nav>
       </div>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
         <header className="bg-white shadow-sm border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -141,18 +141,14 @@ const Layout = ({ children }: LayoutProps) => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/login" className="flex items-center">
-                      Sign out
-                    </Link>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
         </header>
-
-        {/* Page Content */}
         <main className="flex-1 p-6">
           {children}
         </main>

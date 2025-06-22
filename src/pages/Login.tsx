@@ -1,25 +1,37 @@
-
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login success
-    navigate("/dashboard");
+    setIsLoading(true);
+
+    const result = await login(email, password);
+    
+    if (result.success) {
+      navigate(from, { replace: true });
+    }
+    
+    setIsLoading(false);
   };
 
   const handleGoogleLogin = () => {
-    // Simulate Google login
-    navigate("/dashboard");
+    // Simulate Google login for now
+    console.log("Google login not implemented yet");
   };
 
   return (
@@ -43,6 +55,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -54,6 +67,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <Link 
@@ -62,8 +76,8 @@ const Login = () => {
             >
               Forgot password?
             </Link>
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
           
@@ -80,6 +94,7 @@ const Login = () => {
             variant="outline" 
             className="w-full"
             onClick={handleGoogleLogin}
+            disabled={isLoading}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
